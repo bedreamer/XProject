@@ -1,0 +1,424 @@
+UI和后端的通讯规约
+===============
+
+
+版本
+-----
+    v1.3 修订组建方式     2019-01-07
+    v1.2 修订工步        2018-11-20
+    v1.1 起草           2018-10-15
+
+
+连接
+-----
+    TCP
+
+
+协议
+-----
+    HTTP
+    WebSocket
+
+
+格式
+-----
+    JSON
+
+
+请求方式
+-----
+    GET
+    POST
+
+
+端口
+-----
+    8888
+
+
+生产环境
+-----
+    服务器地址: 127.0.0.1
+
+
+调试环境
+    服务器地址1: 127.0.0.1
+    服务器地址2: onlwe.com(SSH用户名: tom, 密码: 123456, 端口: 10000)
+
+
+
+系统组建方式
+-----
+    方式一：
+                         UI
+                         ||
+                         ||
+                      BACKEND <-----> Database
+                         ||
+                         ||
+                    ZLG CAN Driver
+                         ||
+                         ||
+                    USBCAN-2E-U
+                         ||
+                         ||
+                       CAN BUS
+                         ||
+                         ||
+      /========ch0=================ch1=======\
+      |                                      |
+     CANn                                CANCOM-100+
+      |                                     ||
+     BMS                                    ||
+                                        485/MODBUS
+                                            ||
+                                            ||
+                                        恒温恒流设备
+
+    方式二:
+                          UI
+                          ||
+                          ||
+                       BACKEND <-----> Database
+                          ||
+                          ||
+                      Linux Driver
+                          ||
+                          ||
+      /======================================\
+      |                                      |
+     CANn                                   485n
+      |                                      |
+     BMS                                 恒温恒流设备
+
+
+功能-基本信息
+-----
+    path: /v1.0/json/basic/?tsp=timestamp
+    method: GET
+    data: {
+        "status": "ok"|"error",
+        "reason": string,
+        "data": {
+            "bms": {
+                "型号": string,
+                "通讯端口": string,
+                "通讯状态": string,
+                "设备状态": string,
+                "地址": string,
+                "接收数据包": int,
+                ...
+            },
+            "newline": {
+                "型号": string,
+                "通讯端口": string,
+                "通讯状态": string,
+                "设备状态": string,
+                "地址": string,
+                "工作模式": string,
+                "接收数据包": int,
+                ...
+            },
+            "step": {
+                "文件名": string,
+                "工步状态": string,
+                "最大工步数": int,
+                "最大循环次数": int,
+            },
+            "license": {
+                "SN": "@" // @ 表示试用
+                "激活状态": "待激活",
+                "用户": "@",
+                "过期日期": "@",
+                ...
+            },
+            "entry": "/v1.0/json/open/?method=1&model=1&bms=1"
+        }
+    }
+
+
+功能-打开设备
+-----
+    方式一打开设备
+    path: /v1.0/json/open/?method=1&model=1&bms=1
+    方式二打开设备
+    path: /v1.0/json/open/?method=2&model=1&bms=1
+    method: GET
+    data:
+        {
+            "status": "ok"|"error",
+            "reason": string,
+            "next": string
+        }
+    eg.
+        $.getJSON("http://127.0.0.1:8888/open/?method=1", '', function(data, status, xhr){
+            if ( status !== 'success' ) {
+                console.error("open failed!");
+                return;
+            }
+
+            if ( data.status !== "ok" ) {
+                console.error("open failed, reason:", data.reason);
+                return;
+            }
+
+            window.location.href = data.next;
+        });
+
+
+功能-查询设备数据
+-----
+    path: /v1.0/json/newline/?tsp=timestamp
+    method: GET
+    data:
+        {
+            "status": "ok"|"error",
+            "reason": string,
+            "yc": {
+                "工作模式": string,
+                "供液流量": string,
+                "供液压力": string,
+                "回液压力": string,
+                "供液温度": string,
+                "回液温度": string,
+                "阀门开度": string,
+            },
+            "yx": {
+                "加热器运行状态": string,
+                "压缩机运行状态": string,
+                "循环泵运行状态": string,
+            }
+        }
+
+
+功能-设置设备参数
+-----
+    path: /v1.0/json/newline/<function name>/set/<value>/?tsp=timestamp
+    method: GET
+    comment: 设备的遥调，遥控都使用这个接口
+    data:
+        {
+            "status": "ok"|"error",
+            "reason": string,
+        }
+
+
+功能-查询BMS数据
+-----
+    path: /v1.0/json/bms/?tsp=timestamp
+    method: GET
+    data:
+        {
+            "status": "ok"|"error",
+            "reason": string,
+            "yc": {
+                "电池平均": string,
+                "最高电池温度": string,
+                "最低电池温度": string,
+                "电池电压": string,
+                "电池电流": string,
+            },
+            "yx": {
+                "加热允许状态": string,
+                "制冷允许状态": string,
+            }
+        }
+
+
+功能-查询支持的判定条件
+-----
+    path: /v1.0/json/step/supported_conditions/?tsp=timestamp
+    method: GET
+    data: {
+        "status": "ok"|"error",
+        "reason": string,
+        "data": {
+            "self.loop": "self.loop",
+            "True": "True",
+            "False": "False",
+            ....
+        }
+    }
+
+
+功能-编辑工步
+-----
+    path: /v1.0/json/step/<step name>/save/?tsp=timestamp
+    method: POST
+    上传数据为单个工步数据, 存在的覆盖，不存在的新建
+    body: {
+        "mode": "自动模式",
+        "liuliang": 0,
+        "wendu": 0,
+        "jiaregonglv": null,
+        "xunhuan": "N/A",
+        "ttl": 0,
+        "tiaojian": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+        ],
+        "true": "step2",
+        "false": "$auto"
+    }
+    返回数据为全部工步对象
+    data: {
+        "name": "自动控制模式",
+        "main": "step1",
+        "steps": {
+            "step1": {
+              "mode": "自动模式",
+              "liuliang": 0,
+              "wendu": 0,
+              "jiaregonglv": null,
+              "xunhuan": "",
+              "ttl": -1,
+              "tiaojian": [
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                ""
+              ],
+              "true": "$auto",
+              "false": "$auto"
+            },
+            ...
+        }
+    }
+
+
+功能-删除工步
+-----
+    path: /v1.0/json/step/<step name>/delete/?tsp=timestamp
+    method: POST
+    删除单个工步
+    返回数据为全部工步对象
+    data: {
+        "name": "自动控制模式",
+        "main": "step1",
+        "steps": {
+            "step1": {
+              "mode": "自动模式",
+              "liuliang": 0,
+              "wendu": 0,
+              "jiaregonglv": null,
+              "xunhuan": "",
+              "ttl": -1,
+              "tiaojian": [
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                ""
+              ],
+              "true": "$auto",
+              "false": "$auto"
+            },
+            ...
+        }
+    }
+
+
+功能-查询工步
+-----
+    path: /v1.0/json/step/<step name>/get/?tsp=timestamp
+    method: GET
+    查询单个工步
+    返回数据为单个工步对象
+        {
+            "status": "ok"|"error",
+            "reason": string,
+            "<step name>": {
+              "mode": "自动模式",
+              "liuliang": 0,
+              "wendu": 0,
+              "jiaregonglv": null,
+              "xunhuan": "",
+              "ttl": -1,
+              "tiaojian": [
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                ""
+              ],
+              "true": "$auto",
+              "false": "$auto"
+            },
+        }
+
+
+功能-检查工步
+-----
+    path: /v1.0/json/step/check/?tsp=timestamp
+    method: GET
+    返回数据为全部工步对象
+        {
+            "status": "ok"|"error",
+            "reason": string,
+            "data": {
+                "name": "自动控制模式",
+                "main": "step1",
+                "steps": {
+                    "step1": {
+                      "mode": "自动模式",
+                      "liuliang": 0,
+                      "wendu": 0,
+                      "jiaregonglv": null,
+                      "xunhuan": "",
+                      "ttl": -1,
+                      "tiaojian": [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                      ],
+                      "true": "$auto",
+                      "false": "$auto"
+                    },
+                    ...
+                }
+            }
+        }
+
+
+功能-启动工步
+-----
+    path: /v1.0/json/step/start/?tsp=timestamp
+    method: GET
+    返回全部工步状态数据
+        {
+            "status": "ok"|"error",
+            "reason": string,
+            "data": {
+                ... 工步状态，数据格式待定
+            }
+        }
+
+
+功能-停止工步
+-----
+    path: /v1.0/json/step/stop/?tsp=timestamp
+    method: GET
+    返回全部工步状态数据
+        {
+            "status": "ok"|"error",
+            "reason": string,
+            "data": {
+                ... 工步状态，数据格式待定
+            }
+        }

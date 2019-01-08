@@ -10,12 +10,15 @@ if platform.system().lower() == 'windows':
 else:
     host = "127.0.0.1"
 
+
 # REDIS 连接池
 pool = redis.ConnectionPool(host=host, db=5)
 redis_global_config = {
-    "工步状态": "steps:status",
+    # 由任务设置
+    "工步执行状态": "steps:status",
+    # 由任务设置
     "支持的判定条件": "steps:supported_conditions",
-    "工步存储文件名": "steps:file_path",
+    # 由任务初始化, UI设置
     "工步逻辑代码": "steps:logic_code",
 }
 

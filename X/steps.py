@@ -5,6 +5,7 @@ from django.urls import path
 import X.api as api
 import redis
 import json
+import X.tasks as tasks
 
 
 def get_supported_conditions(request):
@@ -109,8 +110,7 @@ def get_fetch_single_step(request, step_name):
 
     logic_step = query.get(api.redis_global_config['工步逻辑代码'])
     if logic_step is None:
-        data = {"main": None, "steps": {}}
-        return api.response_ok(request, data=data)
+        return api.response_error(request, reason="无法获取指定工步名，服务未就绪")
 
     json_step = json.loads(logic_step)
     try:
@@ -119,6 +119,79 @@ def get_fetch_single_step(request, step_name):
         return api.response_error(request, reason="无法获取指定工步名("+str(e)+')')
 
     return api.response_ok(request, data=obj)
+
+
+def get_check_steps(request):
+    """
+    对已有的工步进行语法检查
+    :param request: 请求
+    :return: 成功返回全部工步
+    """
+    try:
+        query = redis.Redis(connection_pool=api.pool)
+    except Exception as e:
+        return api.response_redis_error(request, detail=str(e))
+
+    logic_step = query.get(api.redis_global_config['工步逻辑代码'])
+    if logic_step is None:
+        return api.response_error(request, reason="无法获取指定工步名，服务未就绪")
+
+    steps = json.loads(logic_step)
+    for name, step in steps.items():
+        if step['true'] != '$auto' and step['true'] not in steps:
+            return api.response_error(request,
+                                      reason="".join(["工步=", name, "的 `匹配` 跳转目标:", step['true'], "不存在"]))
+
+        if step['false'] != '$auto' and step['false'] not in steps:
+            return api.response_error(request,
+                                      reason="".join(["工步=", name, "的 `不匹配` 跳转目标:", step['false'], "不存在"]))
+
+        if len(step['tiaojian']) not in {3, 7}:
+            return api.response_error(request, reason="".join(["工步=", name, "的判定条件个数错误!"]))
+
+    data = {
+        "main": "step1",
+        "steps": steps
+    }
+
+    return api.response_ok(request, data=data)
+
+
+def get_start_step(request):
+    """
+    启动工步
+    :param request: 请求
+    :return: 成功返回...
+    """
+    result = tasks.add.delay(1, 2)
+    return api.response_not_implement(request)
+
+
+def get_stop_step(request):
+    """
+    停止工步
+    :param request: 请求
+    :return:
+    """
+    return api.response_not_implement(request)
+
+
+def get_fetch_step_status(request):
+    """
+    获取工步状态
+    :param request: 请求
+    :return: 工步状态
+    """
+    try:
+        query = redis.Redis(connection_pool=api.pool)
+    except Exception as e:
+        return api.response_redis_error(request, detail=str(e))
+
+    status = query.get(api.redis_global_config['工步执行状态'])
+    if status is None:
+        return api.response_error(request, reason="无法获取工步状态，服务未就绪")
+
+    return api.response_ok(request, data=status)
 
 
 urlpatterns = [
@@ -130,9 +203,14 @@ urlpatterns = [
     path('<str:step_name>/delete/', get_delete_single_step),
     # GET 获取单个工步内容
     path('<str:step_name>/get/', get_fetch_single_step),
-    path('check/', api.response_not_implement),
-    path('start/', api.response_not_implement),
-    path('stop/', api.response_not_implement),
+    # GET 检查已有的工步
+    path('check/', get_check_steps),
+    # GET 启动工步
+    path('start/', get_start_step),
+    # GET 停止工步
+    path('stop/', get_stop_step),
+    # GET 当前工步运行状态
+    path('status/', get_fetch_step_status),
 ]
 
 urls = (urlpatterns, "steps", "steps")

@@ -422,3 +422,17 @@ UI和后端的通讯规约
                 ... 工步状态，数据格式待定
             }
         }
+
+
+功能-获取工步状态
+-----
+    path: /v1.0/json/step/status/?tsp=timestamp
+    method: GET
+    返回全部工步状态数据
+        {
+            "status": "ok"|"error",
+            "reason": string,
+            "data": {
+                ... 工步状态，数据格式待定
+            }
+        }

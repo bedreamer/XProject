@@ -75,7 +75,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'XProject.wsgi.application'
 
-CELERY_RESULT_BACKEND = 'django-db'
+CELERY_RESULT_BACKEND = 'redis://192.168.1.30:6379/5'
+CELERY_BROKER_URL = 'redis://192.168.1.30:6379/5'
+
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 

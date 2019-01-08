@@ -3,10 +3,15 @@ __author__ = 'lijie'
 from django.http import *
 import time
 import redis
+import platform
 
+if platform.system().lower() == 'windows':
+    host = "192.168.1.30"
+else:
+    host = "127.0.0.1"
 
 # REDIS 连接池
-pool = redis.ConnectionPool(host='127.0.0.1', db=5)
+pool = redis.ConnectionPool(host=host, db=5)
 redis_global_config = {
     "工步状态": "steps:status",
     "支持的判定条件": "steps:supported_conditions",

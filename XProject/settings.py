@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 
 import os
 import djcelery
+import time
 
 djcelery.setup_loader()
 
@@ -75,8 +76,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'XProject.wsgi.application'
 
-CELERY_RESULT_BACKEND = 'redis://192.168.1.30:6379/5'
 CELERY_BROKER_URL = 'redis://192.168.1.30:6379/5'
+CELERY_RESULT_BACKEND = 'redis://192.168.1.30:6379/5'
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
@@ -126,3 +127,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+redis_global_config = {
+    # 由任务设置
+    "工步执行状态": "steps:status",
+    # 由任务设置
+    "支持的判定条件": "steps:supported_conditions",
+    # 由任务初始化, UI设置
+    "工步逻辑代码": "steps:logic_code",
+}
+
+def now():
+    return time.strftime("%Y-%m-%d %H:%M%S")

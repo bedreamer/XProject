@@ -120,6 +120,7 @@ UI和后端的通讯规约
                 ...
             },
             "step": {
+				"工步文件有效": bool,   //true有效，false无效
                 "文件名": string,
                 "工步状态": string,
                 "最大工步数": int,
@@ -184,7 +185,7 @@ UI和后端的通讯规约
                 "阀门开度": string,
             },
             "yx": {
-                "加热器运行状态": string,
+                "加热器运行状态": string,		//1=="合"，0=="分"
                 "压缩机运行状态": string,
                 "循环泵运行状态": string,
             }
@@ -201,7 +202,14 @@ UI和后端的通讯规约
             "status": "ok"|"error",
             "reason": string,
         }
-
+		
+	function name = 温度设定；
+					流量设定；
+					远程运行程序号选择；
+					恒温/压设备开/关；		运行：true；停止：false
+					排气加液循环泵开/关；	打开：true；关闭：false
+					内/外循环选择；			外循环：true；内循环：false
+					远程定值/程序模式选择； 远程控制：true；模式选择：false
 
 功能-查询BMS数据
 -----
@@ -212,7 +220,7 @@ UI和后端的通讯规约
             "status": "ok"|"error",
             "reason": string,
             "yc": {
-                "电池平均": string,
+                "电池平均温度": string,
                 "最高电池温度": string,
                 "最低电池温度": string,
                 "电池电压": string,
@@ -424,7 +432,7 @@ UI和后端的通讯规约
         }
 
 
-功能-获取工步状态
+功能-工步状态
 -----
     path: /v1.0/json/step/status/?tsp=timestamp
     method: GET

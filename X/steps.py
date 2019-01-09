@@ -6,6 +6,7 @@ import X.api as api
 import redis
 import json
 import X.tasks as tasks
+import XProject.settings as settings
 
 
 def get_supported_conditions(request):
@@ -18,7 +19,7 @@ def get_supported_conditions(request):
     except Exception as e:
         return api.response_redis_error(request, detail=str(e))
 
-    conditions = query.get(api.redis_global_config['支持的判定条件'])
+    conditions = query.get(settings.redis_global_config['支持的判定条件'])
     if conditions is None:
         return api.response_backend_error(request, detail="后端服务未准备好数据.")
 
@@ -47,14 +48,14 @@ def post_save_single_step(request, step_name):
     except Exception as e:
         return api.response_error(request, "提交的数据格式错误("+str(e)+')')
 
-    logic_step = query.get(api.redis_global_config['工步逻辑代码'])
+    logic_step = query.get(settings.redis_global_config['工步逻辑代码'])
     if logic_step is None:
         logic_step = "{}"
 
     logic_json = json.loads(logic_step)
     new_logic_code = dict(logic_json, **{step_name:step})
 
-    query.set(api.redis_global_config['工步逻辑代码'], json.dumps(new_logic_code, ensure_ascii=False))
+    query.set(settings.redis_global_config['工步逻辑代码'], json.dumps(new_logic_code, ensure_ascii=False))
 
     data = {
         "main": "step1",
@@ -76,7 +77,7 @@ def get_delete_single_step(request, step_name):
     except Exception as e:
         return api.response_redis_error(request, detail=str(e))
 
-    logic_step = query.get(api.redis_global_config['工步逻辑代码'])
+    logic_step = query.get(settings.redis_global_config['工步逻辑代码'])
     if logic_step is None:
         data = {"main": None, "steps": {}}
         return api.response_ok(request, data=data)
@@ -84,7 +85,7 @@ def get_delete_single_step(request, step_name):
     json_step = json.loads(logic_step)
     try:
         del json_step[step_name]
-        query.set(api.redis_global_config['工步逻辑代码'], json.dumps(json_step, ensure_ascii=False))
+        query.set(settings.redis_global_config['工步逻辑代码'], json.dumps(json_step, ensure_ascii=False))
     except Exception as e:
         pass
 
@@ -108,7 +109,7 @@ def get_fetch_single_step(request, step_name):
     except Exception as e:
         return api.response_redis_error(request, detail=str(e))
 
-    logic_step = query.get(api.redis_global_config['工步逻辑代码'])
+    logic_step = query.get(settings.redis_global_config['工步逻辑代码'])
     if logic_step is None:
         return api.response_error(request, reason="无法获取指定工步名，服务未就绪")
 
@@ -132,7 +133,7 @@ def get_check_steps(request):
     except Exception as e:
         return api.response_redis_error(request, detail=str(e))
 
-    logic_step = query.get(api.redis_global_config['工步逻辑代码'])
+    logic_step = query.get(settings.redis_global_config['工步逻辑代码'])
     if logic_step is None:
         return api.response_error(request, reason="无法获取指定工步名，服务未就绪")
 
@@ -163,8 +164,8 @@ def get_start_step(request):
     :param request: 请求
     :return: 成功返回...
     """
-    result = tasks.add.delay(1, 2)
-    return api.response_not_implement(request)
+    result = tasks.start_step.delay(settings.redis_global_config['工步逻辑代码'])
+    return api.response_ok(request, data=result.get())
 
 
 def get_stop_step(request):
@@ -173,7 +174,8 @@ def get_stop_step(request):
     :param request: 请求
     :return:
     """
-    return api.response_not_implement(request)
+    result = tasks.stop_step.delay()
+    return api.response_ok(request, data=result.get())
 
 
 def get_fetch_step_status(request):
@@ -182,16 +184,8 @@ def get_fetch_step_status(request):
     :param request: 请求
     :return: 工步状态
     """
-    try:
-        query = redis.Redis(connection_pool=api.pool)
-    except Exception as e:
-        return api.response_redis_error(request, detail=str(e))
-
-    status = query.get(api.redis_global_config['工步执行状态'])
-    if status is None:
-        return api.response_error(request, reason="无法获取工步状态，服务未就绪")
-
-    return api.response_ok(request, data=status)
+    result = tasks.steps_status.delay()
+    return api.response_ok(request, data=result.get())
 
 
 urlpatterns = [

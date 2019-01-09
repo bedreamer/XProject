@@ -1,0 +1,7 @@
+* celery 任务提交后报参数解析错误:
+   windows 平台需要修改worker 参数： -Peventlet
+   > celery worker -A XProject --loglevel=info -Peventlet
+
+* celery 任务提交后一直处于PENDING状态:
+   windows 平台需要修改worker 参数： --pool=solo
+   > celery worker -A XProject --loglevel=info -Peventlet --pool=solo

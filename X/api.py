@@ -12,15 +12,7 @@ else:
 
 
 # REDIS 连接池
-pool = redis.ConnectionPool(host=host, db=5)
-redis_global_config = {
-    # 由任务设置
-    "工步执行状态": "steps:status",
-    # 由任务设置
-    "支持的判定条件": "steps:supported_conditions",
-    # 由任务初始化, UI设置
-    "工步逻辑代码": "steps:logic_code",
-}
+pool = redis.ConnectionPool(host=host, db=6)
 
 
 def response_error(request, reason, **kwargs):

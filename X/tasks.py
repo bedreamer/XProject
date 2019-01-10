@@ -4,6 +4,9 @@ import XProject.celery as cc
 import redis
 import XProject.settings as settings
 import json
+import os
+import time
+from multiprocessing import Process
 
 app = cc.app
 # redis 连接池
@@ -85,3 +88,100 @@ def stop_step():
 
     return status.push()
 
+
+def start_bms_process():
+    os.system("python.exe D:/workspace/plugins/bms.py")
+
+
+def start_newline_process():
+    os.system("python.exe D:/workspace/plugins/newline.py")
+
+
+def start_step_process():
+    os.system("python.exe D:/workspace/plugins/step.py")
+
+
+@app.task
+def open_device():
+    """
+    打开设备
+    :return:
+    """
+    r = redis.Redis(connection_pool=pool)
+
+    pid = r.get(settings.redis_global_config['子进程状态哈希表']+":bms")
+    if pid is None:
+        Process(target=start_bms_process).start()
+        while True:
+            pid = r.get(settings.redis_global_config['子进程状态哈希表']+":bms")
+            if pid is None:
+                time.sleep(0.01)
+                continue
+            bms_pid = pid
+            break
+    else:
+        bms_pid = pid
+
+    pid = r.get(settings.redis_global_config['子进程状态哈希表']+":newline")
+    if pid is None:
+        Process(target=start_newline_process).start()
+        while True:
+            pid = r.get(settings.redis_global_config['子进程状态哈希表']+":newline")
+            if pid is None:
+                time.sleep(0.01)
+                continue
+            newline_pid = pid
+            break
+    else:
+        newline_pid = pid
+
+    pid = r.get(settings.redis_global_config['子进程状态哈希表']+":step")
+    if pid is None:
+        Process(target=start_step_process).start()
+        while True:
+            pid = r.get(settings.redis_global_config['子进程状态哈希表']+":step")
+            if pid is None:
+                time.sleep(0.01)
+                continue
+            step_pid = pid
+            break
+    else:
+        step_pid = pid
+
+    return {
+        "bms_pid": int(bms_pid),
+        "newline_pid": int(newline_pid),
+        "step_pid": int(step_pid)
+    }
+
+
+@app.task
+def close_device():
+    r = redis.Redis(connection_pool=pool)
+
+    pid = r.get(settings.redis_global_config['子进程状态哈希表']+":bms")
+    if pid is None:
+        bms_pid = -1
+    else:
+        bms_pid = pid
+        os.system("taskkill.exe /f /pid:%d" % int(pid))
+
+    pid = r.get(settings.redis_global_config['子进程状态哈希表']+":newline")
+    if pid is None:
+        newline_pid = -1
+    else:
+        newline_pid = pid
+        os.system("taskkill.exe /f /pid:%d" % int(pid))
+
+    pid = r.get(settings.redis_global_config['子进程状态哈希表']+":step")
+    if pid is None:
+        step_pid = -1
+    else:
+        step_pid = pid
+        os.system("taskkill.exe /f /pid:%d" % int(pid))
+
+    return {
+        "bms_pid": int(bms_pid),
+        "newline_pid": int(newline_pid),
+        "step_pid": int(step_pid)
+    }

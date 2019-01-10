@@ -11,10 +11,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
-import djcelery
 import time
-
-djcelery.setup_loader()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -35,7 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'django_celery_results',
+    #'django_celery_results',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -136,7 +133,13 @@ redis_global_config = {
     "支持的判定条件": "steps:supported_conditions",
     # 由任务初始化, UI设置
     "工步逻辑代码": "steps:logic_code",
+
+    # 基本信息哈希表
+    "基本信息哈希表": "basic",
+    # 子进程状态表
+    "子进程状态哈希表": "process"
 }
+
 
 def now():
     return time.strftime("%Y-%m-%d %H:%M%S")

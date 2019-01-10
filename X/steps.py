@@ -19,12 +19,23 @@ def get_supported_conditions(request):
     except Exception as e:
         return api.response_redis_error(request, detail=str(e))
 
-    conditions = query.get(settings.redis_global_config['支持的判定条件'])
-    if conditions is None:
-        return api.response_backend_error(request, detail="后端服务未准备好数据.")
+    bms_conditions = query.hget(settings.redis_global_config['支持的判定条件'], "bms")
+    if bms_conditions is None:
+        return api.response_backend_error(request, detail="bms后端服务未准备好数据.")
+
+    newline_conditions = query.hget(settings.redis_global_config['支持的判定条件'], "newline")
+    if newline_conditions is None:
+        return api.response_backend_error(request, detail="newline后端服务未准备好数据.")
+
+    step_conditions = query.hget(settings.redis_global_config['支持的判定条件'], "step")
+    if step_conditions is None:
+        return api.response_backend_error(request, detail="step后端服务未准备好数据.")
 
     try:
-        data = json.loads(conditions)
+        bms_data = json.loads(bms_conditions)
+        newline_data = json.loads(newline_conditions)
+        step_data = json.loads(step_conditions)
+        data = dict(bms_data, **dict(newline_data, **step_data))
     except Exception as e:
         return api.response_redis_error(request, detail="后端数据格式错误("+str(e)+')')
 

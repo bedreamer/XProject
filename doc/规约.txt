@@ -149,7 +149,39 @@ UI和后端的通讯规约
         {
             "status": "ok"|"error",
             "reason": string,
+            "bms_pid": int,
+            "newline_pid": int,
+            "step_pid": int,
             "next": string
+        }
+    eg.
+        $.getJSON("http://127.0.0.1:8888/open/?method=1", '', function(data, status, xhr){
+            if ( status !== 'success' ) {
+                console.error("open failed!");
+                return;
+            }
+
+            if ( data.status !== "ok" ) {
+                console.error("open failed, reason:", data.reason);
+                return;
+            }
+
+            window.location.href = data.next;
+        });
+
+
+功能-关闭设备
+-----
+    关闭设备
+    path: /v1.0/json/close/?method=1&model=1&bms=1
+    method: GET
+    data:
+        {
+            "status": "ok"|"error",
+            "reason": string,
+            "bms_pid": int,
+            "newline_pid": int,
+            "step_pid": int,
         }
     eg.
         $.getJSON("http://127.0.0.1:8888/open/?method=1", '', function(data, status, xhr){

@@ -1,4 +1,4 @@
-<mxfile modified="2019-10-29T13:02:04.669Z" host="www.draw.io" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36" etag="SkghP5TRjzW25t6eZJRQ" version="12.1.7" type="github" pages="2">
+<mxfile modified="2019-10-29T13:08:32.790Z" host="www.draw.io" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36" etag="NwCm7tjvJ1igSoaZ9Oo4" version="12.1.7" type="github" pages="2">
   <diagram id="g1nDHChdI3M6R9JiCXjo" name="第 1 页">
     <mxGraphModel dx="871" dy="674" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="583" math="0" shadow="0">
       <root>
@@ -151,7 +151,7 @@
             <mxPoint x="342.5" y="489" as="sourcePoint"/>
             <mxPoint x="392.5" y="439" as="targetPoint"/>
             <Array as="points">
-              <mxPoint x="610" y="600"/>
+              <mxPoint x="600" y="600"/>
               <mxPoint x="520" y="600"/>
               <mxPoint x="520" y="450"/>
               <mxPoint x="320" y="450"/>
@@ -163,7 +163,7 @@
             <mxPoint x="342.5" y="489" as="sourcePoint"/>
             <mxPoint x="392.5" y="439" as="targetPoint"/>
             <Array as="points">
-              <mxPoint x="590" y="490"/>
+              <mxPoint x="577" y="490"/>
               <mxPoint x="520" y="490"/>
             </Array>
           </mxGeometry>
@@ -255,10 +255,10 @@
           <mxGeometry x="600" y="503" width="160" height="30" as="geometry"/>
         </mxCell>
         <mxCell id="2GGKISkFBEZ9ldlHul2w-74" value="控制数据点发布频道" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;fontSize=15;fillColor=#d5e8d4;strokeColor=#82b366;size=0.04176470588235361;" vertex="1" parent="2GGKISkFBEZ9ldlHul2w-1">
-          <mxGeometry x="560" y="665" width="200" height="30" as="geometry"/>
+          <mxGeometry x="560" y="665" width="160" height="30" as="geometry"/>
         </mxCell>
         <mxCell id="2GGKISkFBEZ9ldlHul2w-76" value="监视事件发布频道" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;fontSize=15;fillColor=#ffe6cc;strokeColor=#d79b00;size=0.03588235294117794;" vertex="1" parent="2GGKISkFBEZ9ldlHul2w-1">
-          <mxGeometry x="540" y="340" width="200" height="30" as="geometry"/>
+          <mxGeometry x="540" y="340" width="150" height="30" as="geometry"/>
         </mxCell>
       </root>
     </mxGraphModel>
